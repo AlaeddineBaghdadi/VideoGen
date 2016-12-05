@@ -1,5 +1,4 @@
 package videogen
-
 import java.util.HashMap
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
@@ -10,8 +9,10 @@ import org.xtext.example.mydsl.videoGen.AlternativeVideoSeq
 import org.xtext.example.mydsl.videoGen.MandatoryVideoSeq
 import org.xtext.example.mydsl.videoGen.OptionalVideoSeq
 import org.xtext.example.mydsl.videoGen.VideoGeneratorModel
-
 import static org.junit.Assert.*
+import java.util.Random
+import java.io.PrintWriter
+import playlist.PlaylistFactory
 
 class VideoDemonstrator {
 	
@@ -32,30 +33,48 @@ class VideoDemonstrator {
 		// loading
 		var videoGen = loadVideoGenerator(URI.createURI("foo2.videogen")) 
 		assertNotNull(videoGen)
-		assertEquals(7, videoGen.videoseqs.size)			
+		assertEquals(7, videoGen.videoseqs.size)	
+		val writer=new PrintWriter("test.txt")		
 		// MODEL MANAGEMENT (ANALYSIS, TRANSFORMATION)
 		videoGen.videoseqs.forEach[videoseq | 
 			if (videoseq instanceof MandatoryVideoSeq) {
 				val desc = (videoseq as MandatoryVideoSeq).description
-				if(desc.videoid.isNullOrEmpty)  desc.videoid = genID()  				
+				//if(desc.videoid.isNullOrEmpty)  desc.videoid = genID()  
+				val desc1=	(videoseq as MandatoryVideoSeq).description.location
+				writer.write(desc1+"\n")			
 			}
 			else if (videoseq instanceof OptionalVideoSeq) {
 				val desc = (videoseq as OptionalVideoSeq).description
-				if(desc.videoid.isNullOrEmpty) desc.videoid = genID() 
+				//if(desc.videoid.isNullOrEmpty) desc.videoid = genID() 
+				val random= new Random().nextInt(1)
+				val desc1=	(videoseq as OptionalVideoSeq).description.location
+				if(random==1)
+				writer.write(desc1+"\n")
 			}
 			else {
 				val altvid = (videoseq as AlternativeVideoSeq)
-				if(altvid.videoid.isNullOrEmpty) altvid.videoid = genID()
-				for (vdesc : altvid.videodescs) {
-					if(vdesc.videoid.isNullOrEmpty) vdesc.videoid = genID()
-				}
+				for (vdesc : altvid.videodescs){
+					//if(altvid.videoid.isNullOrEmpty) altvid.videoid = genID()
+								
+				
+				val j = new Random().nextInt(altvid.videodescs.size)
+				val vid = altvid.videodescs.get(j)
+				//val mediaFile = PlaylistFactoryeInstatnce.createMediafile
+				//mediaFile.location = desc.location
+				//playlistfiles.add(mediaFile)
+				writer.write(vid.location+"\n")		
+				 var p=PlaylistFactory.eINSTANCE.createMediaFile
 			}
+			}
+			
 		]
-	// serializing
-	saveVideoGenerator(URI.createURI("foo2bis.xmi"), videoGen)
-	saveVideoGenerator(URI.createURI("foo2bis.videogen"), videoGen)
 		
-	printToHTML(videoGen)
+		writer.close()
+	// serializing
+	//saveVideoGenerator(URI.createURI("foo2bis.xmi"), videoGen)
+	//saveVideoGenerator(URI.createURI("foo2bis.videogen"), videoGen)
+		
+	//printToHTML(videoGen)
 		 
 			
 	}
